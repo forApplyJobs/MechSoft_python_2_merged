@@ -11,7 +11,7 @@ from wtforms.validators import DataRequired
 from flask_wtf import FlaskForm
 from flask_restful import Resource, Api 
 from sqlalchemy.sql import func
-
+from flask_migrate import Migrate
 ## db ve api kurma muhabbetleri
 
 
@@ -22,47 +22,19 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "mssql+pyodbc://eurocommerce:eurocommerc
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 SECRET_KEY = os.urandom(32)
 app.config['SECRET_KEY'] = SECRET_KEY
 # ...
+
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 api = Api(app) 
 
 ## form ve validation muhabbetleri
-  
-def is_email_valid(address):
-    # Check if the e-mail address already exists in database.
-    return True  # or False
-
-def user_email(form, field):
-    if not is_email_valid(field.data):
-        raise validator.ValidationError("The e-mail address {} is already taken.".format(field.data))
-
-class MeetingForm(Form):
-    topic = StringField('Topic')
-    date = DateField('Date', format='%Y-%m-%d')
-    start_time = TimeField('Start Time', format='%H:%M:%S')
-    end_time = TimeField('End Time', format='%H:%M:%S')
-    participants = FieldList(IntegerField('Participant ID'))
-
-class EditMeetingForm(Form):
-    class Meta:
-        csrf = False
-    meeting_id = IntegerField('Meeting ID')
-    topic = StringField('Topic')
-    date = DateField('Date', format='%Y-%m-%d')
-    start_time = TimeField('Start Time', format='%H:%M:%S')
-    end_time = TimeField('End Time', format='%H:%M:%S')
-    participants = FieldList(IntegerField('Participant ID'))
 
 
-class UserForm(Form):
-    topic = StringField("Topic")
-    date = DateField('Date', format='%Y-%m-%d')
-    start_time = TimeField('Start Time', format='%H:%M:%S')
-    end_time = TimeField('End Time', format='%H:%M:%S')
-    participants = FieldList(IntegerField('Participant ID'))
+
 
 
 ## routing muhabbetleri

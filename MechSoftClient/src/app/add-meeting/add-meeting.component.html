@@ -1,6 +1,7 @@
 <div class="container">
     <h2>Add Meeting</h2>
-    <form (ngSubmit)="addMeeting()" #meetingForm="ngForm">
+    <form (ngSubmit)="addMeeting()">
+        <!-- Toplantı bilgileri -->
         <div class="form-group">
             <label for="topic">Topic:</label>
             <input type="text" id="topic" name="topic"
@@ -28,14 +29,93 @@
         </div>
 
         <div class="form-group">
-            <label for="participants">Participants (comma-separated
-                IDs):</label>
-            <input type="text" id="participants" name="participants"
-                [(ngModel)]="participantsString" class="form-control">
-            <small class="form-text text-muted">Enter participant IDs separated
-                by commas (e.g., 1,2,3).</small>
+            <label for="owner_id">Meeting Owner:</label>
+            <select id="owner_id" name="owner_id"
+                [(ngModel)]="meetingData.owner_id" required
+                class="form-control">
+                <option *ngFor="let user of availableUsers" [value]="user.id">{{
+                    user.name }} ({{ user.email }})</option>
+            </select>
         </div>
 
-        <button type="submit" class="btn btn-primary">Add Meeting</button>
+        <!-- Katılımcılar -->
+        <div class="form-group">
+            <label>Available Users:</label>
+            <ul class="list-group">
+                <li class="list-group-item" *ngFor="let user of availableUsers">
+                    {{ user.name }} ({{ user.email }})
+                    <button type="button"
+                        class="btn btn-primary btn-sm float-right"
+                        (click)="addUser(user)">Add</button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="form-group mt-3">
+            <label>Selected Users:</label>
+            <ul class="list-group">
+                <li class="list-group-item" *ngFor="let user of selectedUsers">
+                    {{ user.name }} ({{ user.email }})
+                    <button type="button"
+                        class="btn btn-danger btn-sm float-right"
+                        (click)="removeUser(user)">Remove</button>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Misafirler -->
+        <div class="form-group mt-3">
+            <label>Guests:</label>
+            <ul class="list-group">
+                <li class="list-group-item"
+                    *ngFor="let guest of meetingData.guests">
+                    {{ guest.name }} ({{ guest.email }})
+                    <button type="button"
+                        class="btn btn-danger btn-sm float-right"
+                        (click)="removeGuest(guest)">Remove</button>
+                </li>
+            </ul>
+            <button type="button" class="btn btn-secondary mt-3"
+                data-bs-toggle="modal" data-bs-target="#guestModal">Add
+                Guest</button>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Add Meeting</button>
     </form>
+
+    <!-- Misafir Ekle Modal'ı -->
+    <div class="modal fade" id="guestModal" tabindex="-1"
+        aria-labelledby="guestModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="guestModalLabel">Add Guest</h5>
+                    <button type="button" class="btn-close"
+                        data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form #guestForm="ngForm">
+                        <div class="form-group">
+                            <label for="guestName">Name:</label>
+                            <input type="text" id="guestName" name="name"
+                                [(ngModel)]="newGuest.name" class="form-control"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label for="guestEmail">Email:</label>
+                            <input type="email" id="guestEmail" name="email"
+                                [(ngModel)]="newGuest.email"
+                                class="form-control" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary"
+                        (click)="addGuest(newGuest)">Add Guest</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

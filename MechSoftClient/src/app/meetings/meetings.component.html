@@ -5,8 +5,13 @@
             class="list-group-item flex-column align-items-start">
             <div class="d-flex w-100 justify-content-between">
                 <h3 class="mb-1">{{ meeting.topic }}</h3>
-                <button class="btn btn-primary btn-sm"
-                    (click)="editMeeting(meeting.id)">Edit Meeting</button>
+                <div>
+                    <button class="btn btn-primary btn-sm me-2"
+                        (click)="editMeeting(meeting.id)">Edit Meeting</button>
+                    <button class="btn btn-danger btn-sm"
+                        (click)="deleteMeeting(meeting.id)">Delete
+                        Meeting</button>
+                </div>
             </div>
             <p class="mb-1">Date: {{ meeting.date }}</p>
             <p class="mb-1">Start Time: {{ meeting.start_time }}</p>

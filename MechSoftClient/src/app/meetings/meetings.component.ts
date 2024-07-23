@@ -13,16 +13,37 @@ import { Router } from '@angular/router';
 export class MeetingsComponent {
   meetings: any[] = [];
 
-  constructor(private meetingService: MeetingsAPIService,
-    private router: Router,
-  ) { }
+  constructor(private meetingService: MeetingsAPIService, private router: Router) { }
 
   ngOnInit(): void {
+    this.loadMeetings();
+  }
+
+  // Toplantıları yükleyen fonksiyon
+  loadMeetings(): void {
     this.meetingService.getMeetings().subscribe(data => {
       this.meetings = data.meetings;
     });
   }
+
+  // Toplantıyı düzenleme fonksiyonu
   editMeeting(meetingId: number): void {
     this.router.navigate(['/edit-meeting', meetingId]);
+  }
+
+  // Toplantıyı silme fonksiyonu
+  deleteMeeting(meetingId: number): void {
+    if (confirm('Are you sure you want to delete this meeting?')) {
+      this.meetingService.deleteMeeting(meetingId).subscribe(
+        response => {
+          alert('Meeting deleted successfully');
+          this.loadMeetings(); // Toplantılar listesine güncel verileri yükle
+        },
+        error => {
+          console.error('Error deleting meeting', error);
+          alert('Error deleting meeting');
+        }
+      );
+    }
   }
 }

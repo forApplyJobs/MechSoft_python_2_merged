@@ -21,14 +21,17 @@ export class MeetingsAPIService {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json'
     });
-
+  
     // Zaman verilerini formatla
     const formattedMeetingData = {
       ...meetingData,
       start_time: this.formatTime(meetingData.start_time),
-      end_time: this.formatTime(meetingData.end_time)
+      end_time: this.formatTime(meetingData.end_time),
+      participants: meetingData.participants || [],  // Katılımcı ID'leri
+      guests: meetingData.guests || [],  // Misafirler
+      owner_id: meetingData.owner_id  // Toplantının sahibi
     };
-
+  
     return this.http.post<any>(`${this.apiUrl}/AddMeeting`, formattedMeetingData, { headers });
   }
 
@@ -49,7 +52,10 @@ export class MeetingsAPIService {
   getMeetings(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/GetAllMeetings`);
   }
-
+  deleteMeeting(meetingId: number): Observable<any> {
+    // DELETE isteği gönder
+    return this.http.delete<any>(`${this.apiUrl}/DeleteMeeting/${meetingId}`);
+  }
   // Belirli bir kullanıcının toplantılarını getirme
   getUserMeetings(userId: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/user/${userId}/meetings`);

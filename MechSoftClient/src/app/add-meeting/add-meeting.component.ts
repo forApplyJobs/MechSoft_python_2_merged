@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MeetingsAPIService } from '../meetings-api.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { UsersAPIService } from '../users-api.service';
 
 
 @Component({
@@ -12,46 +13,96 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './add-meeting.component.html',
   styleUrl: './add-meeting.component.css'
 })
-export class AddMeetingComponent {
+export class AddMeetingComponent  implements OnInit{
   meetingData = {
     topic: '',
     date: '',
     start_time: '',
     end_time: '',
-    participants: []
+    participants: [] as any[],
+    guests: [] as any[],  // Misafirler
+    owner_id: null as number | null // Toplantı sahibi
   };
 
+  availableUsers: any[] = [];
+  selectedUsers: any[] = [];
+  availableGuests: any[] = [];
 
+  newGuest = {
+    name: '',
+    email: ''
+  };
 
-  participantsString: string = '';  // Bu, formda kullanılan stringi temsil eder
+  constructor(
+    private meetingService: MeetingsAPIService,
+    private router: Router,
+    private usersService: UsersAPIService
+  ) {}
 
-  constructor(private meetingService: MeetingsAPIService, private router: Router) {}
+  ngOnInit(): void {
+    this.loadUsers();
+  }
 
-  // Zaman verisini 'HH:mm:ss' formatına dönüştüren bir fonksiyon
-  private formatTime(time: string): string {
-    const [hours, minutes] = time.split(':');
-    return `${hours}:${minutes}:00`;
+  // Kullanıcıları yükler
+  loadUsers(): void {
+    this.usersService.getUsers().subscribe(
+      response => {
+        if (response && response.users) {
+          this.availableUsers = [...response.users];
+        } else {
+          console.error('User data is missing');
+        }
+      },
+      error => {
+        console.error('Error loading users:', error);
+      }
+    );
+  }
+
+  // Kullanıcı ekler
+  addUser(user: any): void {
+    this.selectedUsers.push(user);
+    this.availableUsers = this.availableUsers.filter(u => u.id !== user.id);
+  }
+
+  // Kullanıcı çıkarır
+  removeUser(user: any): void {
+    this.selectedUsers = this.selectedUsers.filter(u => u.id !== user.id);
+    this.availableUsers.push(user);
+  }
+
+  // Misafir ekler
+  addGuest(guest: any): void {
+    if (guest.name && guest.email) {
+      this.meetingData.guests.push(guest);
+      this.newGuest = { name: '', email: '' }; // Temizle
+      // Kapat modal
+      const modalElement = document.getElementById('guestModal');
+      if (modalElement) {
+        const modal = (window as any).bootstrap.Modal.getInstance(modalElement);
+        if (modal) {
+          modal.hide();
+        }
+      }
+    }
+  }
+
+  // Misafir çıkarır
+  removeGuest(guest: any): void {
+    this.meetingData.guests = this.meetingData.guests.filter(g => g.email !== guest.email);
   }
 
   // Toplantıyı eklemek için kullanılan fonksiyon
   addMeeting(): void {
-    // Katılımcı ID'lerini diziye dönüştür
-    const participantsArray = this.participantsString
-      .split(',')
-      .map(id => id.trim())
-      .filter(id => id.length > 0)
-      .map(id => parseInt(id, 10));
-
-    // Zaman verilerini formatla
-    const formattedMeetingData = {
-      ...this.meetingData,
-      start_time: this.formatTime(this.meetingData.start_time),
-      end_time: this.formatTime(this.meetingData.end_time),
-      participants: participantsArray // Katılımcıları dizi olarak gönder
-    };
+    const participantsArray = this.selectedUsers.map(user => user.id);
 
     // API'ye veri gönder
-    this.meetingService.addMeeting(formattedMeetingData).subscribe(response => {
+    this.meetingService.addMeeting({
+      ...this.meetingData,
+      start_time: this.meetingData.start_time, // Zaman formatını değiştirmiyoruz
+      end_time: this.meetingData.end_time,
+      participants: participantsArray // Katılımcı ID'leri
+    }).subscribe(response => {
       alert(response.message);
       this.router.navigate(['/meetings']);
     });

@@ -3,7 +3,7 @@
     <form [formGroup]="meetingForm" (ngSubmit)="editMeeting()">
         <div class="form-group mb-3">
             <label for="topic" class="form-label">Topic:</label>
-            <input type="text" id="topic" formControlName="topic" required
+            <input type="text" id="topic" formControlName="topic"
                 class="form-control">
             <div
                 *ngIf="meetingForm.controls['topic'].invalid && meetingForm.controls['topic'].touched"
@@ -14,7 +14,7 @@
 
         <div class="form-group mb-3">
             <label for="date" class="form-label">Date:</label>
-            <input type="date" id="date" formControlName="date" required
+            <input type="date" id="date" formControlName="date"
                 class="form-control">
             <div
                 *ngIf="meetingForm.controls['date'].invalid && meetingForm.controls['date'].touched"
@@ -26,7 +26,7 @@
         <div class="form-group mb-3">
             <label for="start_time" class="form-label">Start Time:</label>
             <input type="time" id="start_time" formControlName="start_time"
-                required class="form-control">
+                class="form-control">
             <div
                 *ngIf="meetingForm.controls['start_time'].invalid && meetingForm.controls['start_time'].touched"
                 class="text-danger">
@@ -36,7 +36,7 @@
 
         <div class="form-group mb-3">
             <label for="end_time" class="form-label">End Time:</label>
-            <input type="time" id="end_time" formControlName="end_time" required
+            <input type="time" id="end_time" formControlName="end_time"
                 class="form-control">
             <div
                 *ngIf="meetingForm.controls['end_time'].invalid && meetingForm.controls['end_time'].touched"
@@ -71,7 +71,28 @@
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary"
-            [disabled]="meetingForm.invalid">Update Meeting</button>
+        <div class="form-group mb-3">
+            <label for="guests" class="form-label">Guests:</label>
+            <div formArrayName="guests">
+                <div
+                    *ngFor="let guest of meetingForm.get('guests')?.value; let i = index"
+                    [formGroupName]="i">
+                    <input type="text" formControlName="name"
+                        class="form-control mb-2" placeholder="Guest Name"
+                        required>
+                    <input type="email" formControlName="email"
+                        class="form-control mb-2" placeholder="Guest Email"
+                        required>
+                    <button type="button" class="btn btn-danger"
+                        (click)="removeGuest(i)">Remove</button>
+                </div>
+            </div>
+            <button type="button" class="btn btn-secondary mt-3"
+                (click)="addGuest()">Add Guest</button>
+        </div>
+
+        <input type="hidden" formControlName="owner_id" />
+
+        <button type="submit" class="btn btn-primary">Save</button>
     </form>
 </div>
