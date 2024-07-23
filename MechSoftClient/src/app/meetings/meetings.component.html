@@ -1,0 +1,23 @@
+<div *ngIf="meetings.length" class="container mt-5">
+    <h2 class="mb-4">Meetings</h2>
+    <div class="list-group">
+        <div *ngFor="let meeting of meetings"
+            class="list-group-item flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+                <h3 class="mb-1">{{ meeting.topic }}</h3>
+                <button class="btn btn-primary btn-sm"
+                    (click)="editMeeting(meeting.id)">Edit Meeting</button>
+            </div>
+            <p class="mb-1">Date: {{ meeting.date }}</p>
+            <p class="mb-1">Start Time: {{ meeting.start_time }}</p>
+            <p class="mb-1">End Time: {{ meeting.end_time }}</p>
+            <p class="mb-1">Participants:</p>
+            <ul class="list-group">
+                <li *ngFor="let participant of meeting.participants"
+                    class="list-group-item">
+                    {{ participant.name }} ({{ participant.email }})
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
