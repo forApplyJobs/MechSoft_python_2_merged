@@ -31,6 +31,9 @@ export class MeetingsComponent {
     this.router.navigate(['/edit-meeting', meetingId]);
   }
 
+  detailsButton(meetingId:number):void{
+    this.router.navigate(['/meetings', meetingId]);
+  }
   // Toplantıyı silme fonksiyonu
   deleteMeeting(meetingId: number): void {
     if (confirm('Are you sure you want to delete this meeting?')) {

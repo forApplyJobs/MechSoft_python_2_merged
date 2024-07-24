@@ -1,0 +1,36 @@
+<div *ngIf="meeting" class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">{{ meeting.topic }}</h2>
+        </div>
+        <div class="card-body">
+            <p class="card-text"><strong>Date:</strong> {{ meeting.date }}</p>
+            <p class="card-text"><strong>Start Time:</strong> {{
+                meeting.start_time }}</p>
+            <p class="card-text"><strong>End Time:</strong> {{ meeting.end_time
+                }}</p>
+
+            <h3>Participants</h3>
+            <ul class="list-group list-group-flush mb-3">
+                <li class="list-group-item"
+                    *ngFor="let participant of meeting.participants">
+                    {{ participant.name }} ({{ participant.email }})
+                </li>
+            </ul>
+
+            <h3>Guests</h3>
+            <ul class="list-group list-group-flush mb-3">
+                <li class="list-group-item"
+                    *ngFor="let guest of meeting.guests">
+                    {{ guest.name }} ({{ guest.email }})
+                </li>
+            </ul>
+
+            <div *ngIf="owner">
+                <h3>Owner</h3>
+                <p><strong>Name:</strong> {{ owner.name }}</p>
+                <p><strong>Email:</strong> {{ owner.email }}</p>
+            </div>
+        </div>
+    </div>
+</div>

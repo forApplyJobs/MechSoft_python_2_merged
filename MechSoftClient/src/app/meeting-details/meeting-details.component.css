@@ -1,0 +1,14 @@
+.container {
+    height: calc(100vh - 80px); /* Sayfanın geri kalan kısmına göre yüksekliği ayarlar. */
+    overflow-y: auto; /* Dikey kaydırma çubuğu ekler. */
+    padding: 30px; /* Üst, alt, sol ve sağ kenar boşlukları ekler. */
+    box-sizing: border-box; /* Padding ve border'ları yüksekliğe dahil eder. */
+}
+
+.list-group {
+    max-height: calc(100% - 40px); /* Padding'leri hesaba katarak yüksekliği ayarlar. */
+}
+
+.list-group-item {
+    margin-bottom: 10px; /* Her bir liste öğesi arasında boşluk ekler. */
+}

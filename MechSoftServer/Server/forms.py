@@ -21,16 +21,6 @@ class MeetingForm(Form):
     guests = FieldList(FormField(GuestForm))
     owner_id = IntegerField('Owner ID', validators=[DataRequired(),owner_has_conflicting_meeting])
 
-    # def validate(self):
-    #     if not Form.validate(self):
-    #         return False
-    #     if owner_has_conflicting_meeting(self.owner_id.data, self.date.data, self.start_time.data, self.end_time.data):
-    #         self.owner_id.errors.append('Owner has another meeting during this time.')
-    #         return False
-
-    #     return True
-
-    
 
 class EditMeetingForm(Form):
     meeting_id = IntegerField('Meeting ID', validators=[DataRequired()])
@@ -41,12 +31,3 @@ class EditMeetingForm(Form):
     participants = FieldList(IntegerField(),validators=[owner_cannot_added])
     guests = FieldList(FormField(GuestForm), min_entries=0)
     owner_id = IntegerField('Owner ID', validators=[DataRequired(),not_null_or_empty,owner_has_conflicting_meeting])
-    # def validate(self): 
-    #     if not Form.validate(self):
-    #         return False
-
-    #     if owner_has_conflicting_meeting(self.owner_id.data, self.date.data, self.start_time.data, self.end_time.data):
-    #         self.owner_id.errors.append('Owner has another meeting during this time.')
-    #         return False
-
-    #     return True

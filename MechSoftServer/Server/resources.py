@@ -19,44 +19,6 @@ class Users(Resource):
             abort(400)
         return "user representation", 201
 
-# Flask-RESTful resource route muhabbeti
-# class AddMeeting(Resource):
-#     def post(self):
-#         print(request.get_json())
-#         form = MeetingForm(data=request.get_json())
-#         if form.validate():
-#             try:
-#                 data = request.get_json()
-#                 topic = data.get('topic')
-#                 date = datetime.strptime(data.get('date'), '%Y-%m-%d').date()
-#                 start_time = datetime.strptime(data.get('start_time'), '%H:%M:%S').time()
-#                 end_time = datetime.strptime(data.get('end_time'), '%H:%M:%S').time()
-#                 participant_ids = data.get('participants')
-#                 participants = User.query.filter(User.id.in_(participant_ids)).all()
-#                 if(len(participant_ids)!=len(participants)):
-#                     return "not valid users"
-
-#                 meeting = Meeting(
-#                     topic=topic,
-#                     date=date,
-#                     start_time=start_time,
-#                     end_time=end_time,
-#                     participants=participants
-#                 )
-#                 print(meeting)
-#                 db.session.add(meeting)
-#                 db.session.commit()
-#                 return {"message": "Meeting created successfully", "meeting": str(meeting)}, 201
-#             except IntegrityError:
-#                 db.session.rollback()
-#                 abort(300)
-#             except ValueError:
-#                 abort(400)
-#         else:
-#             print("not validated")
-#             abort(400)
-
-
 class AddMeeting(Resource):
     def post(self):
         form = MeetingForm(data=request.get_json())
@@ -198,7 +160,6 @@ class GetAllMeetings(Resource):
 class GetUserMeetings(Resource):
     def get(self, user_id):
         try:
-            # Kullanıcıyı ID'ye göre bul
             user = User.query.get(user_id)
             if not user:
                 abort(404, description="User not found")
@@ -237,12 +198,10 @@ class GetUserMeetings(Resource):
 class GetMeetingById(Resource):
     def get(self, meeting_id):
         try:
-            # Toplantıyı ID'sine göre bul
             meeting = Meeting.query.get(meeting_id)
             if not meeting:
                 return {"message": "Meeting not found"}, 404
-            
-            # Toplantı verilerini JSON formatına dönüştür
+
             meeting_data = {
                 "id": meeting.id,
                 "topic": meeting.topic,
@@ -296,10 +255,8 @@ class DeleteMeeting(Resource):
 class GetUsers(Resource):
     def get(self):
         try:
-            # Tüm kullanıcıları al
             users = User.query.all()
             
-            # Kullanıcıları JSON formatına dönüştür
             users_list = [
                 {
                     "id": user.id,

@@ -46,7 +46,6 @@ def validate_future_datetime(form, field):
 
 
 def owner_has_conflicting_meeting(form, field):
-    # Tarih ve zaman verilerini almak için
     if not form.date.data or not field.data:
         raise ValidationError("This field is required.")
     date_obj = datetime.strptime(form.date.data, '%Y-%m-%d').date()
