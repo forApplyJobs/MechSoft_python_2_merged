@@ -12,4 +12,4 @@ except IOError:
 subprocess.Popen(["python", r".\MechSoftServer\run.py"], shell=True)
 
 # # Angular uygulamasını başlat
-# subprocess.Popen(r"cd .\MechSoftClient\ && ng serve", shell=True)
+subprocess.Popen(r"cd .\MechSoftClient\ && ng serve", shell=True)
