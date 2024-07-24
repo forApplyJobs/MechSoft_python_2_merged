@@ -1,7 +1,7 @@
 .container {
     height: calc(100vh - 80px); /* Sayfanın geri kalan kısmına göre yüksekliği ayarlar. */
     overflow-y: auto; /* Dikey kaydırma çubuğu ekler. */
-    padding: 20px; /* Üst, alt, sol ve sağ kenar boşlukları ekler. */
+    padding: 50px; /* Üst, alt, sol ve sağ kenar boşlukları ekler. */
     box-sizing: border-box; /* Padding ve border'ları yüksekliğe dahil eder. */
 }
 
