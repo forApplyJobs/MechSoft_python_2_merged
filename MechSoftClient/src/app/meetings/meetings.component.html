@@ -1,5 +1,8 @@
 <div *ngIf="meetings.length" class="container mt-5">
-    <h2 class="mb-4">Meetings</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Meetings</h2>
+        <a href="/add-meeting" class="btn btn-primary">Add New Meeting</a>
+    </div>
     <div class="list-group">
         <div *ngFor="let meeting of meetings"
             class="list-group-item flex-column align-items-start">

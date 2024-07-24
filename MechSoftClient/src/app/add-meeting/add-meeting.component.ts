@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsersAPIService } from '../users-api.service';
+import { catchError, throwError } from 'rxjs';
 
 
 @Component({
@@ -23,7 +24,7 @@ export class AddMeetingComponent  implements OnInit{
     guests: [] as any[],  // Misafirler
     owner_id: null as number | null // Toplantı sahibi
   };
-
+  allusers: any[] = [];
   availableUsers: any[] = [];
   selectedUsers: any[] = [];
   availableGuests: any[] = [];
@@ -48,6 +49,7 @@ export class AddMeetingComponent  implements OnInit{
     this.usersService.getUsers().subscribe(
       response => {
         if (response && response.users) {
+          this.allusers=[...response.users];
           this.availableUsers = [...response.users];
         } else {
           console.error('User data is missing');
@@ -95,16 +97,28 @@ export class AddMeetingComponent  implements OnInit{
   // Toplantıyı eklemek için kullanılan fonksiyon
   addMeeting(): void {
     const participantsArray = this.selectedUsers.map(user => user.id);
-
+  
     // API'ye veri gönder
     this.meetingService.addMeeting({
       ...this.meetingData,
       start_time: this.meetingData.start_time, // Zaman formatını değiştirmiyoruz
       end_time: this.meetingData.end_time,
       participants: participantsArray // Katılımcı ID'leri
-    }).subscribe(response => {
+    }).pipe(
+      catchError(error => {
+        let errorMessage = 'An error occurred';
+        if (error.status === 400) {
+          errorMessage = error.error.errors ? JSON.stringify(error.error.errors) : (error.error.message || 'Invalid data provided');
+        } else if (error.error && error.error.message) {
+          errorMessage = error.error.message;
+        }
+        alert(errorMessage);
+        return throwError(() => new Error(errorMessage));
+      })
+    ).subscribe(response => {
       alert(response.message);
-      this.router.navigate(['/meetings']);
+      this.router.navigate(['/']);
     });
   }
+
 }

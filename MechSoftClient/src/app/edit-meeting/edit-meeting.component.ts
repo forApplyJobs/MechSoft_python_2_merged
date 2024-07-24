@@ -17,10 +17,13 @@ import { CommonModule } from '@angular/common';
 export class EditMeetingComponent implements OnInit {
 
   meetingForm: FormGroup;
+  guestForm: FormGroup;
   meetingId: number;
   users: any[] = [];
   availableUsers: any[] = [];
   selectedUsers: any[] = [];
+  guests: any[] = []; // Misafirler
+  meetingOwner:any;
 
   constructor(
     private route: ActivatedRoute,
@@ -35,8 +38,12 @@ export class EditMeetingComponent implements OnInit {
       start_time: ['', Validators.required],
       end_time: ['', Validators.required],
       participants: this.fb.array([]),
-      guests: this.fb.array([]),
       owner_id: ['']
+    });
+
+    this.guestForm = this.fb.group({
+      name: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]]
     });
   }
 
@@ -57,13 +64,14 @@ export class EditMeetingComponent implements OnInit {
         if (response) {
           const meeting = response;
           this.selectedUsers = meeting.participants; // Mevcut katılımcıları seçili kullanıcılar olarak ayarla
-
+          this.guests = meeting.guests || []; // Misafirleri al
+          this.meetingOwner=meeting.owner_id
           this.meetingForm.patchValue({
             topic: meeting.topic,
             date: meeting.date,
             start_time: meeting.start_time,
             end_time: meeting.end_time,
-            owner_id: meeting.owner_id // owner_id'yi form alanına ekleyin
+            owner_id: meeting.owner_id
           });
 
           // Katılımcıları form alanına ekle
@@ -71,16 +79,6 @@ export class EditMeetingComponent implements OnInit {
           participantsArray.clear(); // Önceki katılımcıları temizle
           meeting.participants.forEach((participant: { id: number }) => {
             participantsArray.push(this.fb.control(participant.id));
-          });
-
-          // Misafirleri form alanına ekle
-          const guestsArray = this.meetingForm.get('guests') as FormArray;
-          guestsArray.clear(); // Önceki misafirleri temizle
-          meeting.guests.forEach((guest: { name: string; email: string }) => {
-            guestsArray.push(this.fb.group({
-              name: [guest.name, Validators.required],
-              email: [guest.email, [Validators.required, Validators.email]]
-            }));
           });
 
           this.loadUsers();
@@ -113,7 +111,11 @@ export class EditMeetingComponent implements OnInit {
 
   // Kullanıcıları günceller
   updateAvailableUsers(): void {
-    this.availableUsers = this.users.filter(user => !this.selectedUsers.find(selected => selected.id === user.id));
+    console.log(this.meetingOwner);
+    this.availableUsers = this.users.filter(user => 
+      !this.selectedUsers.find(selected => selected.id === user.id) &&
+      user.id !== this.meetingOwner
+    );
   }
 
   // Kullanıcı ekler
@@ -130,17 +132,23 @@ export class EditMeetingComponent implements OnInit {
 
   // Misafir ekler
   addGuest(): void {
-    const guestsArray = this.meetingForm.get('guests') as FormArray;
-    guestsArray.push(this.fb.group({
-      name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]]
-    }));
+    if (this.guestForm.valid) {
+      this.guests.push(this.guestForm.value);
+      this.guestForm.reset();
+      // Kapat modal
+      const modalElement = document.getElementById('guestModal');
+      if (modalElement) {
+        const modal = (window as any).bootstrap.Modal.getInstance(modalElement);
+        if (modal) {
+          modal.hide();
+        }
+      }
+    }
   }
 
   // Misafiri çıkarır
   removeGuest(index: number): void {
-    const guestsArray = this.meetingForm.get('guests') as FormArray;
-    guestsArray.removeAt(index);
+    this.guests.splice(index, 1);
   }
 
   // Toplantıyı günceller
@@ -152,17 +160,16 @@ export class EditMeetingComponent implements OnInit {
       this.selectedUsers.forEach(user => {
         participantsArray.push(this.fb.control(user.id));
       });
-  
+
       // Form verilerini al
       const meetingData = this.meetingForm.value;
       meetingData.participants = participantsArray.value; // Güncellenmiş katılımcıları al
-      meetingData.guests = this.meetingForm.get('guests')?.value;
-  
-      console.log(meetingData);
+      meetingData.guests = this.guests; // Güncellenmiş misafirleri al
+
       this.meetingService.editMeeting(this.meetingId, meetingData).subscribe(
         response => {
           alert(response.message);
-          this.router.navigate(['/meetings']);
+          this.router.navigate(['/']);
         },
         error => {
           console.error('Error updating meeting', error);
@@ -170,7 +177,6 @@ export class EditMeetingComponent implements OnInit {
         }
       );
     } else {
-      console.log(this.meetingForm.controls);
       alert('Please fill in all required fields.');
     }
   }

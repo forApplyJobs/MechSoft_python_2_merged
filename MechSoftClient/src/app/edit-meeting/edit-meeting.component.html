@@ -1,98 +1,120 @@
-<div class="container mt-5">
+<div class="container">
     <h2>Edit Meeting</h2>
     <form [formGroup]="meetingForm" (ngSubmit)="editMeeting()">
-        <div class="form-group mb-3">
-            <label for="topic" class="form-label">Topic:</label>
+        <!-- Toplantı bilgileri -->
+        <div class="form-group">
+            <label for="topic">Topic:</label>
             <input type="text" id="topic" formControlName="topic"
-                class="form-control">
-            <div
-                *ngIf="meetingForm.controls['topic'].invalid && meetingForm.controls['topic'].touched"
-                class="text-danger">
-                Topic is required.
-            </div>
+                class="form-control" required>
         </div>
 
-        <div class="form-group mb-3">
-            <label for="date" class="form-label">Date:</label>
+        <div class="form-group">
+            <label for="date">Date:</label>
             <input type="date" id="date" formControlName="date"
-                class="form-control">
-            <div
-                *ngIf="meetingForm.controls['date'].invalid && meetingForm.controls['date'].touched"
-                class="text-danger">
-                Date is required.
-            </div>
+                class="form-control" required>
         </div>
 
-        <div class="form-group mb-3">
-            <label for="start_time" class="form-label">Start Time:</label>
+        <div class="form-group">
+            <label for="start_time">Start Time:</label>
             <input type="time" id="start_time" formControlName="start_time"
-                class="form-control">
-            <div
-                *ngIf="meetingForm.controls['start_time'].invalid && meetingForm.controls['start_time'].touched"
-                class="text-danger">
-                Start time is required.
-            </div>
+                class="form-control" required>
         </div>
 
-        <div class="form-group mb-3">
-            <label for="end_time" class="form-label">End Time:</label>
+        <div class="form-group">
+            <label for="end_time">End Time:</label>
             <input type="time" id="end_time" formControlName="end_time"
-                class="form-control">
-            <div
-                *ngIf="meetingForm.controls['end_time'].invalid && meetingForm.controls['end_time'].touched"
-                class="text-danger">
-                End time is required.
-            </div>
+                class="form-control" required>
         </div>
 
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <label for="all-users" class="form-label">All Users:</label>
-                <ul id="all-users" class="list-group">
-                    <li *ngFor="let user of availableUsers"
-                        class="list-group-item d-flex justify-content-between align-items-center">
-                        {{ user.name }}
-                        <button type="button" class="btn btn-primary btn-sm"
-                            (click)="addUser(user)">Add</button>
-                    </li>
-                </ul>
-            </div>
-            <div class="col-md-6">
-                <label for="participants"
-                    class="form-label">Participants:</label>
-                <ul id="participants" class="list-group">
-                    <li *ngFor="let user of selectedUsers"
-                        class="list-group-item d-flex justify-content-between align-items-center">
-                        {{ user.name }}
-                        <button type="button" class="btn btn-danger btn-sm"
-                            (click)="removeUser(user)">Remove</button>
-                    </li>
-                </ul>
-            </div>
+        <div class="form-group">
+            <label for="owner_id">Meeting Owner:</label>
+            <select id="owner_id" formControlName="owner_id"
+                class="form-control" required>
+                <option *ngFor="let user of users" [value]="user.id">
+                    {{ user.name }} ({{ user.email }})
+                </option>
+            </select>
         </div>
 
-        <div class="form-group mb-3">
-            <label for="guests" class="form-label">Guests:</label>
-            <div formArrayName="guests">
-                <div
-                    *ngFor="let guest of meetingForm.get('guests')?.value; let i = index"
-                    [formGroupName]="i">
-                    <input type="text" formControlName="name"
-                        class="form-control mb-2" placeholder="Guest Name"
-                        required>
-                    <input type="email" formControlName="email"
-                        class="form-control mb-2" placeholder="Guest Email"
-                        required>
-                    <button type="button" class="btn btn-danger"
+        <!-- Katılımcılar -->
+        <div class="form-group mt-3">
+            <label>Available Users:</label>
+            <ul class="list-group">
+                <li class="list-group-item" *ngFor="let user of availableUsers">
+                    {{ user.name }} ({{ user.email }})
+                    <button type="button"
+                        class="btn btn-primary btn-sm float-right"
+                        (click)="addUser(user)">Add</button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="form-group mt-3">
+            <label>Selected Users:</label>
+            <ul class="list-group">
+                <li class="list-group-item" *ngFor="let user of selectedUsers">
+                    {{ user.name }} ({{ user.email }})
+                    <button type="button"
+                        class="btn btn-danger btn-sm float-right"
+                        (click)="removeUser(user)">Remove</button>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Misafirler -->
+        <div class="form-group mt-3">
+            <label>Guests:</label>
+            <ul class="list-group">
+                <li class="list-group-item"
+                    *ngFor="let guest of guests; let i = index">
+                    {{ guest.name }} ({{ guest.email }})
+                    <button type="button"
+                        class="btn btn-danger btn-sm float-right"
                         (click)="removeGuest(i)">Remove</button>
+                </li>
+            </ul>
+            <button type="button" class="btn btn-secondary mt-3"
+                data-bs-toggle="modal" data-bs-target="#guestModal">Add
+                Guest</button>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Update
+            Meeting</button>
+    </form>
+
+    <!-- Misafir Ekle Modal'ı -->
+    <div class="modal fade" id="guestModal" tabindex="-1"
+        aria-labelledby="guestModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="guestModalLabel">Add Guest</h5>
+                    <button type="button" class="btn-close"
+                        data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form [formGroup]="guestForm">
+                        <div class="form-group">
+                            <label for="guestName">Name:</label>
+                            <input type="text" id="guestName"
+                                formControlName="name" class="form-control"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label for="guestEmail">Email:</label>
+                            <input type="email" id="guestEmail"
+                                formControlName="email" class="form-control"
+                                required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary"
+                        (click)="addGuest()">Add Guest</button>
                 </div>
             </div>
-            <button type="button" class="btn btn-secondary mt-3"
-                (click)="addGuest()">Add Guest</button>
         </div>
-
-        <input type="hidden" formControlName="owner_id" />
-
-        <button type="submit" class="btn btn-primary">Save</button>
-    </form>
+    </div>
 </div>

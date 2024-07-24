@@ -60,6 +60,7 @@ class Users(Resource):
 class AddMeeting(Resource):
     def post(self):
         form = MeetingForm(data=request.get_json())
+        print(form.errors)
         if form.validate():
             print(request.get_json())
             try:
@@ -97,18 +98,16 @@ class AddMeeting(Resource):
             except ValueError:
                 abort(400)
         else:
-            abort(400)
+            print(form.errors)
+            return {"message": "Form validation failed", "errors": form.errors}, 400
 
 
 class EditMeeting(Resource):
     def post(self):
         form = EditMeetingForm(data=request.get_json())
         print(request.get_json())
-        print(form.errors)
         if form.validate():
-            print("helloooo")
             try:
-                # Formdan gelen veriyi al
                 meeting_id = form.meeting_id.data
                 topic = form.topic.data
                 date = form.date.data
@@ -116,24 +115,16 @@ class EditMeeting(Resource):
                 end_time = form.end_time.data
                 participant_ids = form.participants.data
                 guest_forms = form.guests.data
-                
-                # Toplantıyı ID'sine göre bul
                 meeting = db.session.get(Meeting, meeting_id)
                 if not meeting:
                     abort(404, description="Meeting not found")
-
-                # Katılımcıları al
                 participants = User.query.filter(User.id.in_(participant_ids)).all()
                 if len(participant_ids) != len(participants):
                     return {"message": "Not valid users"}, 400
-                
-                # Misafirleri kontrol et
                 if guest_forms is None or len(guest_forms) == 0:
-                    # Misafirleri temizle
                     for guest in meeting.guests:
                         db.session.delete(guest)
                 else:
-                    # Yeni misafirleri oluştur veya güncelle
                     existing_guests = {guest.id for guest in meeting.guests}
                     new_guests = {guest_data.get('id') for guest_data in guest_forms if 'id' in guest_data}
 
@@ -153,15 +144,11 @@ class EditMeeting(Resource):
                             guest = Guest(name=guest_data.get('name'), email=guest_data.get('email'))
                             guest.meeting = meeting
                             db.session.add(guest)
-
-                # Toplantı verilerini güncelle
                 meeting.topic = topic
                 meeting.date = date
                 meeting.start_time = start_time
                 meeting.end_time = end_time
                 meeting.participants = participants
-
-                # Değişiklikleri veritabanına kaydet
                 db.session.commit()
                 return {"message": "Meeting updated successfully", "meeting": str(meeting)}, 200
             
@@ -176,10 +163,7 @@ class EditMeeting(Resource):
 class GetAllMeetings(Resource):
     def get(self):
         try:
-            # Tüm toplantıları al
             meetings = Meeting.query.all()
-            
-            # Toplantıları JSON formatına dönüştür
             meetings_list = []
             for meeting in meetings:
                 meeting_data = {
@@ -191,11 +175,19 @@ class GetAllMeetings(Resource):
                     "participants": [
                         {
                             "id": participant.id,
-                            "name": participant.firstname+" "+participant.lastname,  # Kullanıcının adı
-                            "email": participant.email  # Kullanıcının e-posta adresi
+                            "name": participant.firstname+" "+participant.lastname, 
+                            "email": participant.email 
                         }
                         for participant in meeting.participants
-                    ]
+                    ],
+                    "guests": [
+                        {
+                            "name": guest.name,
+                            "email": guest.email
+                        }
+                        for guest in meeting.guests
+                    ],
+                    "owner_id":meeting.owner_id
                 }
                 meetings_list.append(meeting_data)
             
@@ -210,11 +202,7 @@ class GetUserMeetings(Resource):
             user = User.query.get(user_id)
             if not user:
                 abort(404, description="User not found")
-            
-            # Kullanıcının katıldığı toplantıları al
             meetings = user.meetings
-            
-            # Toplantıları JSON formatına dönüştür
             meetings_list = []
             for meeting in meetings:
                 meeting_data = {
@@ -226,11 +214,19 @@ class GetUserMeetings(Resource):
                     "participants": [
                         {
                             "id": participant.id,
-                            "name": participant.firstname+" "+participant.lastname,  # Kullanıcının adı
-                            "email": participant.email  # Kullanıcının e-posta adresi
+                            "name": participant.firstname+" "+participant.lastname,  
+                            "email": participant.email  
                         }
                         for participant in meeting.participants
-                    ]
+                    ],
+                    "guests": [
+                        {
+                            "name": guest.name,
+                            "email": guest.email
+                        }
+                        for guest in meeting.guests
+                    ],
+                    "owner_id":meeting.owner_id
                 }
                 meetings_list.append(meeting_data)
             
@@ -280,22 +276,16 @@ class GetMeetingById(Resource):
 class DeleteMeeting(Resource):
     def delete(self, meeting_id):
         try:
-            # Toplantıyı ID'sine göre bul
             meeting = Meeting.query.get(meeting_id)
             if not meeting:
                 return {"message": "Meeting not found"}, 404
-            
-            # Toplantının misafirlerini sil
             if meeting.guests:
                 for guest in meeting.guests:
                     db.session.delete(guest)
-            
-            # Toplantıyı sil
             db.session.delete(meeting)
             db.session.commit()
             
             return {"message": "Meeting deleted successfully"}, 200
-        
         except Exception as e:
             db.session.rollback()
             return {"message": "An error occurred", "error": str(e)}, 500

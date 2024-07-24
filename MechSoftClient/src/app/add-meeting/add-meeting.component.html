@@ -46,7 +46,10 @@
                     {{ user.name }} ({{ user.email }})
                     <button type="button"
                         class="btn btn-primary btn-sm float-right"
-                        (click)="addUser(user)">Add</button>
+                        [disabled]="user.id === meetingData.owner_id"
+                        (click)="addUser(user)">
+                        Add
+                    </button>
                 </li>
             </ul>
         </div>
